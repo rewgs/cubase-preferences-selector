@@ -1,4 +1,5 @@
 import pathlib
+import os
 import shutil
 import sys
 
@@ -9,7 +10,7 @@ def main():
     specified_config = None
 
     # for count, arg in enumerate(args):
-    #     print(f'Arg {count}: {arg}')
+    #     print(f'DEBUG: Arg {count}: {arg}')
 
     if len(args) > 2:
         print('Too many arguments. Only one argument allowed.')
@@ -18,7 +19,8 @@ def main():
 
     version = '12'
 
-    # hard-coding these to my machine for now, but once a GUI is added, allow users to browse to them, save presets containing one or more locations to their machine, etc
+    # FIXME: hard-coding these to my machine for now, but once a GUI is added, allow users to browse 
+    # to them, save presets containing one or more locations to their machine, etc
     user_configs = [
         {
             'user': 'Alex Ruger',
@@ -39,15 +41,18 @@ def main():
     # Cubase default location; this must remain hard-coded and unchangeable
     # TODO: once I make this app cross-platform, automatically define this based on OS
     default_config = pathlib.Path(pathlib.PurePath.joinpath(pathlib.Path.home(), 'Library', 'Preferences', f'Cubase {version}')).absolute()
-    backups = pathlib.PurePath.joinpath(default_config, "_backups")
+
+    default_items = []
+    for d in pathlib.Path.iterdir(default_config):
+        default_items.append(d.name)
+
+    user_items = []
+    for u in pathlib.Path.iterdir(specified_config['path']):
+        user_items.append(u.name)
 
     to_swap = [
         # as strings
         'Presets',
-        # 'Click Sound Sets',
-        # 'KeyCommands',
-        # 'Logical Edit',
-        # 'Project Logical Editor',
         'Clickset Presets.xml',
         'Key Commands.xml',
         'Profile Manager.xml',
@@ -62,77 +67,48 @@ def main():
         # pathlib.PurePath('Key Commands.xml'),
         # pathlib.PurePath('Profile Manager.xml'),
         # pathlib.PurePath('UserPreferences.xml')
-        # ['Presets', 'Click Sound Sets'],
-        # ['Presets', 'KeyCommands'],
-        # ['Presets', 'Logical Edit'],
-        # ['Presets', 'Project Logical Editor'],
     ]    
 
-    # if one in default_config is a file or folder, back up
-    # else if it's a link, delete the link
-    # symlink from specified_config to default_config
-    # MAKE SURE that we're linking TO the user config FROM the default folder, not the other way around
-
-    default_items = []
-    for d in pathlib.Path.iterdir(default_config):
-        default_items.append(d.name)
-
-    user_items = []
-    for u in pathlib.Path.iterdir(specified_config['path']):
-        user_items.append(u.name)
-
     for item in to_swap:
-        if item in default_items and item in user_items:
-            default_item = pathlib.Path(pathlib.PurePath.joinpath(default_config, item)).resolve()
+        print(f'Current item: {item}')
+        # if (item in user_items and item in default_items) or (item in default_items and item in user_items):
+        # if item in user_items and (item in default_items or item not in default_items):
+        if item in user_items and item in default_items or item not in default_items:
+            default_item = pathlib.PurePath.joinpath(default_config, item)
             user_item = pathlib.Path(pathlib.PurePath.joinpath(specified_config['path'], item)).resolve()
 
-            # if not default_item.is_dir() or not default_item.is_file() or not default_item.is_symlink():
-            #     print('Taking the if not')
+            if user_item.is_dir():
+                print(f'{user_item} is a dir')
+                if pathlib.Path(default_item).exists():
+                    if shutil.rmtree.avoids_symlnk_attacks == True:
+                        print('yay')
+                    else:
+                        print('no')
+
+                # shutil.rmtree(default_item)
+                # default_item.rmdir()
+                # default_item.symlink_to(user_item, target_is_directory=True)
+            # elif user_item.is_file():
+            #     print(f'{user_item} is a file')
+            #     os.remove(default_item)
+            #     default_item.symlink_to(user_item, target_is_directory=False)
+
+            # if default_item.is_symlink():
+            #     print(f'{default_item} is a symlink')
+            #     if user_item.is_dir():
+            #         default_item.rmdir()
+            #         default_item.symlink_to(user_item, target_is_directory=True)
+            #     elif user_item.is_file():
+            #         default_item.unlink(missing_ok=True)
+            #         default_item.symlink_to(user_item, target_is_directory=False)
+            # else:
+            #     print('Taking the else')
             #     print(f'Something weird just happened. {default_item} is apparently not a directory, file, or symbolic link.')
             #     return
-
-            if default_item.is_dir():
-                print(f'{default_item} is a dir')
-                backup_dst = pathlib.Path(pathlib.PurePath.joinpath(backups, item))
-                if not backup_dst.exists():
-                    pathlib.Path.mkdir(backups, parents=True, exist_ok=True)
-                shutil.move(default_item, backup_dst)
-                default_item.symlink_to(user_item, target_is_directory=True)
-
-            elif default_item.is_file():
-                print(f'{default_item} is a file')
-                backup_dst = pathlib.Path(pathlib.PurePath.joinpath(backups, item))
-                if not backup_dst.exists():
-                    pathlib.Path.mkdir(backups, parents=True, exist_ok=True)
-                shutil.move(default_item, backup_dst)
-                default_item.symlink_to(user_item, target_is_directory=False)
-
-            elif default_item.is_symlink():
-                print(f'{default_item} is a symlink')
-                if user_item.is_dir():
-                    default_item.rmdir()
-                    default_item.symlink_to(user_item, target_is_directory=True)
-                elif user_item.is_file():
-                    default_item.unlink(missing_ok=True)
-                    default_item.symlink_to(user_item, target_is_directory=False)
-
-            else:
-                print('Taking the else')
-                print(f'Something weird just happened. {default_item} is apparently not a directory, file, or symbolic link.')
-                return
-
-
-    # debug; can comment out
-    # for config in user_configs:
-    #     user = config['user']
-    #     nickname = config['nickname']
-    #     path = pathlib.Path(config['path'])
-
-    #     if user == specified_config or nickname == specified_config: 
-    #         if path.exists:
-    #             print(f'The Cubase config for {user} is located at {path}.')
-    #         else:
-    #             print(f'The Cubase config for {user} cannot be found at {path}.')
+        elif item not in user_items:
+            print(f"{item} is not located in {specified_config['path']}")
+        else:
+            print('Something else is going on.')
 
 
 if __name__ == '__main__':
