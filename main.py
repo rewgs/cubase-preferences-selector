@@ -1,5 +1,5 @@
 import pathlib
-import shutil
+# import shutil
 import sys
 
 import configs
@@ -7,11 +7,6 @@ import configs
 
 def main():
     specified_config = configs.get_config(sys.argv)
-    print(specified_config)
-
-    breakpoint()
-
-    # backups = pathlib.PurePath.joinpath(configs.default_config, "_backups")
 
     to_swap = [
         # as strings
@@ -34,10 +29,6 @@ def main():
         # pathlib.PurePath('Key Commands.xml'),
         # pathlib.PurePath('Profile Manager.xml'),
         # pathlib.PurePath('UserPreferences.xml')
-        # ['Presets', 'Click Sound Sets'],
-        # ['Presets', 'KeyCommands'],
-        # ['Presets', 'Logical Edit'],
-        # ['Presets', 'Project Logical Editor'],
     ]    
 
     # if one in configs.default_config is a file or folder, back up
@@ -65,18 +56,10 @@ def main():
 
             if default_item.is_dir():
                 print(f'{default_item} is a dir')
-                backup_dst = pathlib.Path(pathlib.PurePath.joinpath(backups, item))
-                if not backup_dst.exists():
-                    pathlib.Path.mkdir(backups, parents=True, exist_ok=True)
-                shutil.move(default_item, backup_dst)
                 default_item.symlink_to(user_item, target_is_directory=True)
 
             elif default_item.is_file():
                 print(f'{default_item} is a file')
-                backup_dst = pathlib.Path(pathlib.PurePath.joinpath(backups, item))
-                if not backup_dst.exists():
-                    pathlib.Path.mkdir(backups, parents=True, exist_ok=True)
-                shutil.move(default_item, backup_dst)
                 default_item.symlink_to(user_item, target_is_directory=False)
 
             elif default_item.is_symlink():
@@ -92,19 +75,6 @@ def main():
                 print('Taking the else')
                 print(f'Something weird just happened. {default_item} is apparently not a directory, file, or symbolic link.')
                 return
-
-
-    # debug; can comment out
-    # for config in user_configs:
-    #     user = config['user']
-    #     nickname = config['nickname']
-    #     path = pathlib.Path(config['path'])
-
-    #     if user == specified_config or nickname == specified_config: 
-    #         if path.exists:
-    #             print(f'The Cubase config for {user} is located at {path}.')
-    #         else:
-    #             print(f'The Cubase config for {user} cannot be found at {path}.')
 
 
 if __name__ == '__main__':
