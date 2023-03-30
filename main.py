@@ -2,44 +2,16 @@ import pathlib
 import shutil
 import sys
 
+import configs
+
 
 def main():
-    args = sys.argv
-    config_arg = None # allows testing via running `python main.py` without any arguments
-    specified_config = None
+    specified_config = configs.get_config(sys.argv)
+    print(specified_config)
 
-    # for count, arg in enumerate(args):
-    #     print(f'Arg {count}: {arg}')
+    breakpoint()
 
-    if len(args) > 2:
-        print('Too many arguments. Only one argument allowed.')
-    elif len(args) == 2:
-        config_arg = args[1]
-
-    version = '12'
-
-    # hard-coding these to my machine for now, but once a GUI is added, allow users to browse to them, save presets containing one or more locations to their machine, etc
-    user_configs = [
-        {
-            'user': 'Alex Ruger',
-            'nickname': 'rewgs',
-            'path': pathlib.Path(pathlib.PurePath().joinpath(pathlib.Path.home(), '.config', 'cubase-preferences', f'Cubase {version}')).absolute()
-        },
-        {
-            'user': 'Sparks and Shadows',
-            'nickname': 'sns',
-            'path': pathlib.Path(pathlib.PurePath().joinpath(pathlib.Path.home(), 'work', 'sns', 'development', 'cubase-preferences', f'Cubase {version}')).absolute()
-        },
-    ]
-
-    for config in user_configs:
-        if config['user'] == config_arg or config['nickname'] == config_arg:
-            specified_config = config
-
-    # Cubase default location; this must remain hard-coded and unchangeable
-    # TODO: once I make this app cross-platform, automatically define this based on OS
-    default_config = pathlib.Path(pathlib.PurePath.joinpath(pathlib.Path.home(), 'Library', 'Preferences', f'Cubase {version}')).absolute()
-    backups = pathlib.PurePath.joinpath(default_config, "_backups")
+    # backups = pathlib.PurePath.joinpath(configs.default_config, "_backups")
 
     to_swap = [
         # as strings
@@ -68,13 +40,13 @@ def main():
         # ['Presets', 'Project Logical Editor'],
     ]    
 
-    # if one in default_config is a file or folder, back up
+    # if one in configs.default_config is a file or folder, back up
     # else if it's a link, delete the link
-    # symlink from specified_config to default_config
+    # symlink from specified_config to configs.default_config
     # MAKE SURE that we're linking TO the user config FROM the default folder, not the other way around
 
     default_items = []
-    for d in pathlib.Path.iterdir(default_config):
+    for d in pathlib.Path.iterdir(configs.default_config):
         default_items.append(d.name)
 
     user_items = []
@@ -83,7 +55,7 @@ def main():
 
     for item in to_swap:
         if item in default_items and item in user_items:
-            default_item = pathlib.Path(pathlib.PurePath.joinpath(default_config, item)).resolve()
+            default_item = pathlib.Path(pathlib.PurePath.joinpath(configs.default_config, item)).resolve()
             user_item = pathlib.Path(pathlib.PurePath.joinpath(specified_config['path'], item)).resolve()
 
             # if not default_item.is_dir() or not default_item.is_file() or not default_item.is_symlink():
