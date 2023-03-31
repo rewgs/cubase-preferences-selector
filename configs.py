@@ -32,7 +32,7 @@ def get_config(args):
     else:
         for config in user_configs:
             if config['user'] == args[1] or config['nickname'] == args[1]:
-                return args[1]
+                return config
             else:
                 print('Cubase config not found. Please try again.')
                 get_config(args, user_configs)
