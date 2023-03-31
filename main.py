@@ -7,7 +7,15 @@ import configs
 
 
 def main():
-    specified_config = configs.get_config(sys.argv)
+    user_config = configs.get_config(sys.argv)
+
+    default_items = []
+    for d in pathlib.Path.iterdir(configs.default_config):
+        default_items.append(d.name)
+
+    user_items = []
+    for u in pathlib.Path.iterdir(user_config):
+        user_items.append(u.name)
 
     to_swap = [
         'Presets',
@@ -17,17 +25,9 @@ def main():
         'UserPreferences.xml',
     ]    
 
-    default_items = []
-    for d in pathlib.Path.iterdir(configs.default_config):
-        default_items.append(d.name)
-
-    user_items = []
-    for u in pathlib.Path.iterdir(specified_config['path']):
-        user_items.append(u.name)
-
     for item in to_swap:
         if item in user_items:
-            user_item = pathlib.Path(pathlib.PurePath.joinpath(specified_config['path'], item)).resolve()
+            user_item = pathlib.Path(pathlib.PurePath.joinpath(user_config, item)).resolve()
 
             if item in default_items:
                 default_item = pathlib.Path(pathlib.PurePath.joinpath(configs.default_config, item))
