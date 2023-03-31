@@ -7,3 +7,10 @@ Then run `python main.py {user}`, where `{user}` is equal to the user name speci
 Example: `python main.py rewgs` to switch to my personal config; `python main.py sns` to switch to the Sparks and Shadows config.
 
 Currently Mac-only.
+
+# TO FIX
+
+- Key commands aren't switching properly. Selecting the rewgs config and then the associated key commands does not load them -- instead key commands remain custom. Might be an issue with the key commands file itself, though? 
+    - Updates: 
+        - The AR.xml key commands file definitely isn't formatted correctly...that may have something to do with it.
+        - Definitely something wrong with that file ^. The sns key commands load correctly. That's great, it's not a bug with the code, the file is just fucked. I guess that's one reason to keep this all in a git repo...
