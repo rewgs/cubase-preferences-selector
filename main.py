@@ -1,6 +1,6 @@
 import pathlib
 import os
-import shutil
+# import shutil
 import sys
 
 import configs
@@ -35,32 +35,35 @@ def main():
                 #     print(f'{default_item} exists!')
 
                 if default_item.is_symlink():
-                    print(f'{default_item} is a symlink')
+                    # print(f'DEBUG: {default_item} is a symlink')
                     if default_item.is_dir():
                         # print(f'{default_item} is a dir')
-
-                        # Using `os` instead of `pathlib` here because pathlib's rmdir() doesn't 
-                        # work as expected. The documentation states that rmdir() can delete links 
-                        # to directories, but it just...doesn't work. Seems that it always expects 
-                        # a directory, period.
-                        # On the other hand, os.unlink() works just fine.
+                        
+                        '''
+                        Using `os` instead of `pathlib` here because pathlib's rmdir() doesn't 
+                        work as expected. The documentation states that rmdir() can delete links 
+                        to directories, but it just...doesn't work. Seems that it always expects 
+                        a directory, period.
+                        On the other hand, os.unlink() works just fine.
+                        '''
                         os.unlink(default_item)
-                        # default_item.symlink_to(user_item, target_is_directory=True)
+                        default_item.symlink_to(user_item, target_is_directory=True)
                     if default_item.is_file():
                         # print(f'{default_item} is a file')
                         default_item.unlink(missing_ok=True)
-                    #     default_item.symlink_to(user_item, target_is_directory=False)
+                        default_item.symlink_to(user_item, target_is_directory=False)
                 else:
                     print('placeholder')
-                    # if default_item.is_dir():
-                    #     print(f'{default_item} is a dir')
-                    #     default_item.rmdir
-                    #     default_item.symlink_to(user_item, target_is_directory=True)
+                    if default_item.is_dir():
+                        # print(f'DEBUG: {default_item} is a dir')
+                        default_item.rmdir
+                        default_item.symlink_to(user_item, target_is_directory=True)
 
-                    # elif default_item.is_file():
-                    #     print(f'{default_item} is a file')
-                    #     default_item.symlink_to(user_item, target_is_directory=False)
+                    elif default_item.is_file():
+                        # print(f'DEBUG: {default_item} is a file')
+                        default_item.symlink_to(user_item, target_is_directory=False)
 
+            # this branch runs if the default Cubase config is incomplete for some reason
             elif item not in default_items:
                 default_item = pathlib.PurePath.joinpath(configs.default_config, item)
                 if user_item.is_dir():
