@@ -1,12 +1,49 @@
-import pathlib
+# TODO: this is still deleting user files!!
+# TODO: looks like Generic Remotes end up in the prefs folder too once imported...will need to account for those as well
+    # maybe link to them in cubase-preferences/Generic Remotes folder (for sns)...will that work?
+    # also, note that Generic Remote #1 is always called Generic Remote.xml
+
+'''
+    validate-stems: Moves silent stems from a given directory to their own
+    subdirectory. Also alerts the user to any clipped files.
+
+    This source code was originally written by Jacob Moss, and then was
+    refactored and expanded upon by Alex Ruger.
+
+'''
+
+__author__ = ['Alex Ruger']
+__copyright__ = f"Copyright 2022, {__author__}"
+__deprecated__ = False
+# __email__      = ''
+# __license__    = 'TBD'
+__maintainer__ = "Alex Ruger"
+__status__ = "production"
+__version__ = "0.0.1"
+
+
 import os
-# import shutil
 import sys
+# import shutil
+import pathlib
+import PySimpleGUI as sg
 
 import configs
+import gui
 
 
 def main():
+    window = gui.make_window()
+
+    while True:
+        event, values = window.read()
+
+        if event == sg.WIN_CLOSED:
+            break
+
+        if event == "Exit":
+            break
+
     user_config = configs.get_config(sys.argv)
 
     default_items = []
