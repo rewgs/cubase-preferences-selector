@@ -1,4 +1,4 @@
-__app_name__ = "Cubase Config Chooser"
+__app_name__ = "Cubase Preferences Selector"
 __version__ = "0.1.0"
 
 (
