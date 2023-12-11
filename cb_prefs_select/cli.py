@@ -24,5 +24,11 @@ def main(
         help="Show the application's version and exit.",
         callback=_version_callback,
         is_eager=True
+    ),
+    cubase_version: Optional[bool] = typer.Option(
+        None,
+        "--cubase-version",
+        "-v",
+        help="Specifies which version of Cubase to return stock preferences for.",
     )
 ) -> None: return
