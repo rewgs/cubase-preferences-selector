@@ -4,26 +4,23 @@ from platform import system
 from types import NoneType
 from dataclasses import dataclass
 
-
-
-
 class CubasePreferences:
     """
     Contains all default and custom Cubase preferences.
     """
 
-    @dataclass
-    class CubasePref:
-        """
-        A single instance of Cubase preferences.
-        """
-        name: str 
-        description: str
-        main_prefs_path: Path
-        user_preset_path: Path
-        version: int # which Cubase version this is intended to work with
-
     def __init__(self, default_main_prefs_location, default_user_presets_location, default_preferences, custom_preferences, current):
+        @dataclass
+        class CubasePref:
+            """
+            A single instance of Cubase preferences.
+            """
+            name: str 
+            description: str
+            main_prefs_path: Path
+            user_preset_path: Path
+            version: int # which Cubase version this is intended to work with
+
         self.default_main_prefs_location: Path = default_main_prefs_location
         self.default_user_presets_location: Path = default_user_presets_location
         self.default_preferences: list = default_preferences    # TODO: this should just be the return value of __get_all_default()
@@ -60,17 +57,16 @@ class Cubase:
     """ Deals with the application of Cubase itself
     """
 
-    @dataclass
-    class CubaseApp:
-        """ A specific instance of the application Cubase
-        """
-        location: Path
-        version: int
-
-
     def __init__(self, default_location, installed):
+        @dataclass
+        class CubaseApp:
+            """ A specific instance of the application Cubase
+            """
+            location: Path
+            version: int
+
         self.default_location: Path = default_location
-        self.installed: list = installed
+        self.installed: list[CubaseApp] = installed
 
 
     def get_installation_path(self):
