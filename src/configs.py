@@ -41,22 +41,18 @@ class CubasePreferences:
         If multiple Cubase versions are present, returns the most recent.
         """
 
-        try:
-            system() == "Darwin" or system() == "Windows"
-        except Exception as error:
-            raise error
-        else:
-            if system() == "Darwin":
-                self.default_main_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
-                try:
-                    self.default_main_prefs_location.resolve(strict=True)
-                except FileNotFoundError as error:
-                    raise error
-                else:
-                    default_configs = [file for file in self.default_main_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
-                    return default_configs
-
-            # if system() == "Windows":
+        if system() == "Darwin":
+            self.default_main_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
+            try:
+                self.default_main_prefs_location.resolve(strict=True)
+            except FileNotFoundError as error:
+                raise error
+            else:
+                default_configs = [file for file in self.default_main_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
+                return default_configs
+        # TODO:
+        elif system() == "Windows":
+            pass
 
 # TODO: Implement behavior for `version` != None
 # def get_default_cubase_prefs(version: int | NoneType = None) -> list | bool:

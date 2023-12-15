@@ -22,19 +22,14 @@ class Cubase:
         self.is_open: bool = self.__check_if_open()
 
     def __get_default_location(self):
-        try:
-            system() == "Darwin" or system() == "Windows"
-        except Exception as error:
-            raise error
-        else:
-            if system() == "Darwin":
-                default_location: Path = Path(
-                    PurePath(Path.home().root).joinpath("Applications")
-                )
-                return default_location
-            # TODO:
-            if system() == "Windows":
-                pass
+        if system() == "Darwin":
+            default_location: Path = Path(
+                PurePath(Path.home().root).joinpath("Applications")
+            )
+            return default_location
+        # TODO:
+        elif system() == "Windows":
+            pass
 
     def __get_installations(self):
         installations: list[CubaseApp] = []
