@@ -1,9 +1,12 @@
-import cli, configs
+import cli
+from configs import Cubase
 
 
 def main():
     cli.parser.parse_args()
-    configs.get_stock_config()
+
+    cubase = Cubase()
+    print(cubase.installations)
 
 
 
