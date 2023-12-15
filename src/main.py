@@ -9,9 +9,9 @@ def main():
     cubase_app = cubase.App()
     # print(cubase_app.default_location)
 
-    cubase_prefs = cubase.Preferences()
-    for p in cubase_prefs.default:
-        print(p)
+    # cubase_prefs = cubase.Preferences()
+    # for p in cubase_prefs.default:
+    #     print(p)
 
 
 
