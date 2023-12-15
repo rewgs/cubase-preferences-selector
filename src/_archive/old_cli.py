@@ -1,9 +1,3 @@
-"""
---help:                 Displays this menu.
---version, -V:          Displays the version of this app.
---cubase-version, -v:   Optional argument used to specify which version of Cubase to find stock preferences for.
-"""
-
 import typer
 from cb_prefs_select import __app_name__, __version__
 from typing import Optional
