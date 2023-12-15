@@ -4,62 +4,68 @@ from platform import system
 from types import NoneType
 from dataclasses import dataclass
 
-# class CubasePreferences:
-#     """
-#     Contains all default and custom Cubase preferences.
-#     """
-
-#     def __init__(self, default_main_prefs_location, default_user_presets_location, default_preferences, custom_preferences, current):
-#         @dataclass
-#         class CubasePref:
-#             """
-#             A single instance of Cubase preferences.
-#             """
-#             name: str
-#             description: str
-#             main_prefs_path: Path
-#             user_preset_path: Path
-#             version: int # which Cubase version this is intended to work with
-
-#         self.default_main_prefs_location: Path = default_main_prefs_location
-#         self.default_user_presets_location: Path = default_user_presets_location
-#         self.default_preferences: list = default_preferences    # TODO: this should just be the return value of __get_all_default()
-#         self.custom_preferences: list = custom_preferences
-#         self.current: CubasePref = current
-
-#     def __get_all_default(self):
-#         """
-#         Checks for the default Cubase preferences location on both macOS and Windows.
-#         If found, returns list of Path objects.
-#         If not found, checks if Cubase application is present.
-#         If Cubase application is found, raises error that .
-#         If multiple Cubase versions are present, returns the most recent.
-#         """
-
-#         try:
-#             system() == "Darwin" or system() == "Windows"
-#         except Exception as error:
-#             raise error
-#         else:
-#             if system() == "Darwin":
-#                 self.default_main_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
-#                 try:
-#                     self.default_main_prefs_location.resolve(strict=True)
-#                 except FileNotFoundError as error:
-#                     raise error
-#                 else:
-#                     default_configs = [file for file in self.default_main_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
-#                     return default_configs
-
-#             # if system() == "Windows":
-
 
 @dataclass
 class CubaseApp:
     """A specific instance of the application Cubase"""
-
     location: Path
     version: int
+
+
+@dataclass
+class CubasePref:
+    """
+    Defines a single instance of Cubase preferences, whether they be default or custom.
+    """
+    name: str
+    description: str
+    kind: str # default or custom
+    main_prefs_path: Path
+    user_preset_path: Path
+    version: CubaseApp # which Cubase version this is intended to work with
+
+
+# TODO: merge most if not all of this with class Cubase
+class CubasePreferences:
+    """
+    Contains all default and custom Cubase preferences.
+    """
+
+    def __init__(self, default_main_prefs_location, default_user_presets_location, default_preferences, custom_preferences, current):
+
+        self.default_main_prefs_location: Path = default_main_prefs_location
+        self.default_user_presets_location: Path = default_user_presets_location
+        self.default_preferences: list = default_preferences    # TODO: this should just be the return value of __get_all_default()
+        self.custom_preferences: list = custom_preferences
+        self.current: CubasePref = current
+
+    def __get_all_default(self):
+        """
+        Checks for the default Cubase preferences location on both macOS and Windows.
+        If found, returns list of Path objects.
+        If not found, checks if Cubase application is present.
+        If Cubase application is found, raises error that .
+        If multiple Cubase versions are present, returns the most recent.
+        """
+
+        try:
+            system() == "Darwin" or system() == "Windows"
+        except Exception as error:
+            raise error
+        else:
+            if system() == "Darwin":
+                self.default_main_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
+                try:
+                    self.default_main_prefs_location.resolve(strict=True)
+                except FileNotFoundError as error:
+                    raise error
+                else:
+                    default_configs = [file for file in self.default_main_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
+                    return default_configs
+
+            # if system() == "Windows":
+
+
 
 
 class Cubase:

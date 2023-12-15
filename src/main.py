@@ -1,12 +1,13 @@
 import cli
-from configs import Cubase
+from cubase import Cubase
 
 
 def main():
     cli.parser.parse_args()
 
     cubase = Cubase()
-    print(cubase.installations)
+    # print(cubase.installations)
+    print(cubase.is_open)
 
 
 
