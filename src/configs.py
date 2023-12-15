@@ -2,73 +2,120 @@ from pathlib import Path
 from pathlib import PurePath
 from platform import system
 from types import NoneType
-
-# Cubase default location; this must remain hard-coded and unchangeable
-# TODO: once I make this app cross-platform, automatically define this based on OS
-# default_config = Path(PurePath.joinpath(Path.home(), "Library", "Preferences", f"Cubase {version}")).resolve(strict=True)
-
-# hard-coding these to my machine for now, but once a GUI is added, allow users
-# to browse to them, save presets containing one or more locations to their
-# machine, etc
-# user_configs: list = [
-#     {
-#         "user": "Alex Ruger",
-#         "nickname": "rewgs",
-#         "path": Path(PurePath().joinpath(Path.home(), ".config", "cubase-preferences",f"Cubase {version}")).absolute()
-#     },
-#     {
-#         "user": "Sparks and Shadows",
-#         "nickname": "sns",
-#         "path": Path(PurePath().joinpath(Path.home(), "work", "sns", "development", "cubase-preferences", f"Cubase {version}")).absolute()
-#     },
-# ]
+from dataclasses import dataclass
 
 
-# def get_config(args):
-#     checked_configs = []
-#     specified_config = args[1]
 
-#     if len(checked_configs) == len(user_configs):
-#         # TODO: only recursively call this function when asking for user input; otherwise the first instance of invalid input causes it to run forever and crash
 
-#         # print(f'{specified_config} not found. Please try again.')
-#         # get_config(args)
+class CubasePreferences:
+    """
+    Contains all default and custom Cubase preferences.
+    """
 
-#         print("The following configs were checked and were not found:")
-#         for config in checked_configs:
-#             print(f"{config}")
-#         print("Please check your config paths and try again. Exiting now.")
-#     else:
-#         for config in user_configs:
-#             if (specified_config == config["user"] or specified_config == config["nickname"]) and config["path"].exists():
-#                 return config["path"]
-#             else:
-#                 checked_configs.append(config)
+    @dataclass
+    class CubasePref:
+        """
+        A single instance of Cubase preferences.
+        """
+        name: str 
+        description: str
+        main_prefs_path: Path
+        user_preset_path: Path
+        version: int # which Cubase version this is intended to work with
+
+    def __init__(self, default_main_prefs_location, default_user_presets_location, default_preferences, custom_preferences, current):
+        self.default_main_prefs_location: Path = default_main_prefs_location
+        self.default_user_presets_location: Path = default_user_presets_location
+        self.default_preferences: list = default_preferences    # TODO: this should just be the return value of __get_all_default()
+        self.custom_preferences: list = custom_preferences
+        self.current: CubasePref = current
+
+    def __get_all_default(self):
+        """
+        Checks for the default Cubase preferences location on both macOS and Windows.
+        If found, returns list of Path objects.
+        If not found, checks if Cubase application is present.
+        If Cubase application is found, raises error that .
+        If multiple Cubase versions are present, returns the most recent.
+        """
+
+        try: 
+            system() == "Darwin" or system() == "Windows"
+        except Exception as error:
+            raise error
+        else:
+            if system() == "Darwin":
+                self.default_main_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
+                try:
+                    self.default_main_prefs_location.resolve(strict=True)
+                except FileNotFoundError as error:
+                    raise error
+                else:
+                    default_configs = [file for file in self.default_main_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
+                    return default_configs
+
+            # if system() == "Windows":
+
+class Cubase:
+    """ Deals with the application of Cubase itself
+    """
+
+    @dataclass
+    class CubaseApp:
+        """ A specific instance of the application Cubase
+        """
+        location: Path
+        version: int
+
+
+    def __init__(self, default_location, installed):
+        self.default_location: Path = default_location
+        self.installed: list = installed
+
+
+    def get_installation_path(self):
+        try: 
+            system() == "Darwin" or system() == "Windows"
+        except Exception as error:
+            raise error
+        else:
+            if system() == "Darwin":
+                self.default_location = Path(PurePath(Path.home().root).joinpath("Applications"))
+                app_paths = [file for file in self.default_location.iterdir() if file.is_dir and "Cubase" in file.name]
+
+            # TODO: 
+            if system() == "Windows":
+                pass
+
+
+    def get_installed(self):
+            app_paths = self.get_installation_path()
+
+            for p in app_paths:
+                version_comp: list = [int(char) for char in p.name.split() if char.isdigit()]
+                assert len(version_comp) == 0 and len(version_comp[0]) != 0
+
+
+
+
+
 
 
 # TODO: Implement behavior for `version` != None
-def get_stock_config(version: int | NoneType = None) -> Path | bool:
+def get_default_cubase_prefs(version: int | NoneType = None) -> list | bool:
     """
-    Checks for the stock Cubase preferences location on both macOS and Windows.
-    If found, returns Path object; if not, returns False.
-    If multiple Cubase versions are present, default behavior is to return only the most recent, 
-    but this behavior can be overridden by passing a value to the argument `version`.
+    Checks for the default Cubase preferences location on both macOS and Windows.
+    If found, returns list of Path objects; if not, returns False.
+    If multiple Cubase versions are present, returns the most recent.
     """
 
     if system() == "Darwin":
-        stock_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
-        stock_configs = [file for file in stock_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
-        if len(stock_configs) == 1: 
-            return stock_configs[0]
-        else:
-            # This is a nested list comprehension. Gets the numbers from each config in stock_configs, 
-            # and then packs those into a single list called version_nums.
-            version_nums: list = [ [int(char) for char in config.name.split() if char.isdigit()] for config in stock_configs ]
-
-            newest_version = max(version_nums)[0] # `version_nums` is a single-member list
-            for config in stock_configs:
-                if str(newest_version) in config.name:
-                    return config.resolve(strict=True)
+        default_prefs_location = Path(PurePath.joinpath(Path.home(), "Library", "Preferences"))
+        default_configs = [file for file in default_prefs_location.iterdir() if file.is_dir and "Cubase" in file.name]
+        return default_configs
+        # if len(default_configs) == 1: 
+        #     return default_configs[0]
+        # else:
     elif system() == "Linux":
         ...
     elif system() == "Windows":
@@ -76,3 +123,20 @@ def get_stock_config(version: int | NoneType = None) -> Path | bool:
     else:
         return False
 
+
+def get_cubase_version_num(default_configs: list):
+    # This is a nested list comprehension. Gets the numbers from each config in default_configs, 
+    # and then packs those into a single list called version_nums.
+    version_nums: list = [ [int(char) for char in config.name.split() if char.isdigit()] for config in default_configs ]
+
+    path_and_nums = []
+    for config in default_configs:
+        path_and_nums.append(dict(
+            path: Path = config,
+            version: int = 
+        ))
+    
+    # newest_version = max(version_nums)[0] # `version_nums` is a single-member list
+    # for config in default_configs:
+    #     if str(newest_version) in config.name:
+    #         return config.resolve(strict=True)
