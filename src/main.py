@@ -1,20 +1,20 @@
 import cli
 from platform import system
-from cubase import Cubase
+import cubase
 
 
 def main():
     cli.parser.parse_args()
 
-    cubase = Cubase()
-    print(cubase.default_location)
-    # print(cubase.installations)
-    # print(cubase.is_open)
+    cubase_app = cubase.App()
+    # print(cubase_app.default_location)
+
+    cubase_prefs = cubase.Preferences()
+    for p in cubase_prefs.default:
+        print(p)
+
 
 
 
 if __name__ == "__main__":
-    if system() != "Darwin" or system() != "Windows":
-        print(f"{system()} is not supported!")
-    else:
-        main()
+    main()
