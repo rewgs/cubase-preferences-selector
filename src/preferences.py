@@ -19,7 +19,7 @@ class CubasePref:
 
 
 # TODO: merge most if not all of this with class Cubase
-class CubasePreferences:
+class DefaultPreferences:
     """
     Contains all default and custom Cubase preferences.
     """
