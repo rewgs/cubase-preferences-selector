@@ -1,16 +1,16 @@
 import cli
 from platform import system
-import cubase
+from cubase import CubaseApp, CubasePreferences
 
 
 def main():
     cli.parser.parse_args()
 
-    cubase_app = cubase.App()
-    # print(cubase_app.default_location)
+    cubase = CubaseApp()
+    print(cubase.default_path)
 
-    # cubase_prefs = cubase.Preferences()
-    # for p in cubase_prefs.default:
+    prefs = CubasePreferences()
+    # for p in prefs.default:
     #     print(p)
 
 

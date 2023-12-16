@@ -15,7 +15,7 @@ class Installation:
 
 
 @dataclass
-class CubasePref:
+class Pref:
     """
     A single instance of Cubase preferences, either default or custom.
     """
@@ -29,7 +29,7 @@ class CubasePref:
     associated_installation: Installation
 
 
-class App:
+class CubaseApp:
     def __init__(self):
         self.default_path: Path = self.__get_default_main_prefs()
         self.apps: list[Installation] = self.__get_installed_apps()
@@ -87,13 +87,13 @@ class App:
             return newest[0]
 
 
-class Preferences:
+class CubasePreferences:
     def __init__(self):
         self.default_main_path: Path = self.__get_default_main_path()
         self.default_user_path: Path = self.__get_default_user_path()
-        self.default: list[CubasePref] = self.__get_default_preferences(App().apps)
-        # self.custom_preferences: list[CubasePref] = custom_preferences
-        # self.current: CubasePref = current
+        self.default: list[Pref] = self.__get_default_preferences(CubaseApp().apps)
+        # self.custom_preferences: list[Pref] = custom_preferences
+        # self.current: Pref = current
 
     def __get_default_main_path(self) -> Path:
         default_main_path: Path = Path(PurePath(Path.home()))
@@ -129,8 +129,8 @@ class Preferences:
         else:
             return default_user_path.resolve(strict=True)
 
-    def __get_default_preferences(self, installed_apps: list[Installation]) -> list[CubasePref] | None:
-        default_prefs: list[CubasePref] = []
+    def __get_default_preferences(self, installed_apps: list[Installation]) -> list[Pref] | None:
+        default_prefs: list[Pref] = []
 
         for file in self.default_main_path.iterdir():
             if file.is_dir():
@@ -141,7 +141,7 @@ class Preferences:
                         except FileNotFoundError as error:
                             raise error
                         else:
-                            pref = CubasePref(
+                            pref = Pref(
                                 file.name,
                                 i.version,
                                 "",
