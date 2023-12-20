@@ -7,12 +7,9 @@ def main():
     cli.parser.parse_args()
 
     cubase = CubaseApp()
-    print(cubase.default_path)
-
     prefs = CubasePreferences()
-    # for p in prefs.default:
-    #     print(p)
 
+    print(cubase.default_path)
 
 
 

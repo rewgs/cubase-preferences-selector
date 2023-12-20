@@ -7,8 +7,10 @@ import psutil
 
 
 @dataclass
-class Installation:
-    """A specific instance of an installation of Cubase"""
+class App:
+    """
+    A specific instance of an App of Cubase.
+    """
 
     path: Path
     version: int
@@ -23,18 +25,18 @@ class Pref:
     name: str
     version: int
     description: str
-    default: bool # False for custom
+    default: bool  # False for custom
     main_prefs_path: Path
     user_preset_path: Path
-    associated_installation: Installation
+    associated_installation: App
 
 
 class CubaseApp:
     def __init__(self):
         self.default_path: Path = self.__get_default_main_prefs()
-        self.apps: list[Installation] = self.__get_installed_apps()
+        self.apps: list[App] = self.__get_installed_apps()
         self.is_open: bool = self.__check_if_open()
-        self.newest: Installation = self.__get_newest_version()
+        self.newest: App = self.__get_newest_version()
 
     def __get_default_main_prefs(self) -> Path:
         default_path: Path = Path(PurePath(Path.home().root))
@@ -52,8 +54,8 @@ class CubaseApp:
         else:
             return default_path.resolve(strict=True)
 
-    def __get_installed_apps(self) -> list[Installation]:
-        installations: list[Installation] = []
+    def __get_installed_apps(self) -> list[App]:
+        installations: list[App] = []
 
         app_paths = [
             file
@@ -63,8 +65,8 @@ class CubaseApp:
         for p in app_paths:
             extracted_number: list = [char for char in p.stem.split() if char.isdigit()]
             version_number = int(extracted_number[0])
-            installation = Installation(p, version_number)
-            installations.append(installation)
+            app = App(p, version_number)
+            installations.append(App)
 
         return installations
 
@@ -74,7 +76,7 @@ class CubaseApp:
                 return True
         return False
 
-    def __get_newest_version(self) -> Installation:
+    def __get_newest_version(self) -> App:
         version_nums = [i.version for i in self.apps]
         newest_version_num = max(version_nums)
         newest = [i for i in self.apps if str(newest_version_num) in i.path.stem]
@@ -91,6 +93,7 @@ class CubasePreferences:
     def __init__(self):
         self.default_main_path: Path = self.__get_default_main_path()
         self.default_user_path: Path = self.__get_default_user_path()
+        # FIX: the use of CubaseApp() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
         self.default: list[Pref] = self.__get_default_preferences(CubaseApp().apps)
         # self.custom_preferences: list[Pref] = custom_preferences
         # self.current: Pref = current
@@ -129,7 +132,7 @@ class CubasePreferences:
         else:
             return default_user_path.resolve(strict=True)
 
-    def __get_default_preferences(self, installed_apps: list[Installation]) -> list[Pref] | None:
+    def __get_default_preferences(self, installed_apps: list[App]) -> list[Pref] | None:
         default_prefs: list[Pref] = []
 
         for file in self.default_main_path.iterdir():
@@ -153,6 +156,43 @@ class CubasePreferences:
                             default_prefs.append(pref)
         return default_prefs
 
-
-    def add_custom(self):
+    # read: https://realpython.com/python-json/
+    def store_custom():
         pass
+
+        
+    # read: https://realpython.com/python-json/
+    def read_custom():
+        pass
+
+
+    # TODO: version needs to be the most recent Cubase version instead of None...how to do?
+    def add_custom(self, name: str, path: Path, version: int | NoneType = None, description: str | NoneType = None) -> Pref:
+        try:
+            path.resolve(strict=True)
+        except FileNotFoundError as error:
+            raise error
+        else:
+            def resolve_associated_installation(version) -> App | NoneType:
+                if version == None:
+                    return None
+                # else:
+                    # return most recent App
+
+            custom_pref_path = path.resolve(strict=True)
+
+            # remaining attr declarations
+            custom_pref_associated_installation = resolve_associated_installation(version)
+
+            # FIX: the use of CubasePreferences() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
+            custom_pref_user_preset_path: Path = CubasePreferences().default_user_path
+
+            custom_pref = Pref(
+                name,
+                version,
+                description,
+                False,
+                custom_pref_path,
+                custom_pref_user_preset_path,
+                custom_pref_associated_installation
+            )
