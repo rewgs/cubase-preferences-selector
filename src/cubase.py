@@ -6,14 +6,89 @@ from dataclasses import dataclass
 import psutil
 
 
-@dataclass
 class App:
     """
-    A specific instance of an App of Cubase.
+    A single Cubase application installation (i.e. one for Cubase 12, another for Cubase 13, etc). 
+    Composed from class Cubase?
     """
 
-    path: Path
-    version: int
+    def __init__(self, path, version):
+        self.path: Path = path
+        self.version: int = version
+
+    def __repr__(self):
+        return f"Cubase version {self.version} is called {self.path.name} and is located at {self.path}"
+
+    def __str__(self):
+        """
+        This is a special function that runs when printing instances of this object, 
+        e.g. cubase_13 = App(some_path, 13); print(cubase_13)
+        """
+        return f"Cubase version {self.version} is called {self.path.name} and is located at {self.path}"
+
+
+class Cubase:
+    """
+    Primary class regarding Cubase.
+    """
+
+    def __get_installed_apps(self) -> list[App]:
+        def get_default_path() -> Path:
+            default_path: Path = Path(PurePath(Path.home().root))
+
+            if system() == "Darwin":
+                default_path = default_path.joinpath("Applications")
+            # TODO:
+            elif system() == "Windows":
+                pass
+
+            try:
+                default_path.resolve(strict=True)
+            except FileNotFoundError as error:
+                raise error
+            else:
+                return default_path.resolve(strict=True)
+
+
+        installations: list[App] = []
+        app_paths = [file for file in get_default_path().iterdir() if file.is_dir() and "Cubase" in file.name]
+
+        for p in app_paths:
+            extracted_number: list = [char for char in p.stem.split() if char.isdigit()]
+            version_number = int(extracted_number[0])
+            app = App(p, version_number)
+            installations.append(app)
+
+        return installations
+
+    def __get_newest_version(self) -> App:
+        version_nums = [i.version for i in self.apps]
+        newest_version_num = max(version_nums)
+        newest = [i for i in self.apps if str(newest_version_num) in i.path.stem]
+        return newest[0]
+
+    def __init__(self):
+        self.apps: list[App] = self.__get_installed_apps()
+        self.newest: App = self.__get_newest_version()
+
+    def __str__(self):
+        return "test"
+
+    def get_by_version(self, version: int) -> App | NoneType:
+        for app in self.apps:
+            if app.version == version:
+                return app
+        return None
+
+    # TODO: make a version of this that checks if a specific version of Cubase is open; do this in class CubaseApp
+    def is_open(self) -> bool:
+        """
+        Checks if *any* version of Cubase is open.
+        """
+        for proc in psutil.process_iter(["pid", "name", "username"]):
+            if "Cubase" in proc.name() and proc.is_running():
+                return True
+        return False
 
 
 @dataclass
@@ -30,71 +105,16 @@ class Pref:
     user_preset_path: Path
     associated_installation: App
 
+class Preferences:
+    """
+    Deals with locating, storing, and creating Cubase preferences, both default and custom.
+    """
 
-class CubaseApp:
-    def __init__(self):
-        self.default_path: Path = self.__get_default_main_prefs()
-        self.apps: list[App] = self.__get_installed_apps()
-        self.is_open: bool = self.__check_if_open()
-        self.newest: App = self.__get_newest_version()
-
-    def __get_default_main_prefs(self) -> Path:
-        default_path: Path = Path(PurePath(Path.home().root))
-
-        if system() == "Darwin":
-            default_path = default_path.joinpath("Applications")
-        # TODO:
-        elif system() == "Windows":
-            pass
-
-        try:
-            default_path.resolve(strict=True)
-        except FileNotFoundError as error:
-            raise error
-        else:
-            return default_path.resolve(strict=True)
-
-    def __get_installed_apps(self) -> list[App]:
-        installations: list[App] = []
-
-        app_paths = [
-            file
-            for file in self.default_path.iterdir()
-            if file.is_dir() and "Cubase" in file.name
-        ]
-        for p in app_paths:
-            extracted_number: list = [char for char in p.stem.split() if char.isdigit()]
-            version_number = int(extracted_number[0])
-            app = App(p, version_number)
-            installations.append(App)
-
-        return installations
-
-    def __check_if_open(self) -> bool:
-        for proc in psutil.process_iter(["pid", "name", "username"]):
-            if "Cubase" in proc.name() and proc.is_running():
-                return True
-        return False
-
-    def __get_newest_version(self) -> App:
-        version_nums = [i.version for i in self.apps]
-        newest_version_num = max(version_nums)
-        newest = [i for i in self.apps if str(newest_version_num) in i.path.stem]
-        # print(newest)
-        try:
-            len(newest) == 1
-        except Exception as error:
-            raise error
-        else:
-            return newest[0]
-
-
-class CubasePreferences:
     def __init__(self):
         self.default_main_path: Path = self.__get_default_main_path()
         self.default_user_path: Path = self.__get_default_user_path()
-        # FIX: the use of CubaseApp() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
-        self.default: list[Pref] = self.__get_default_preferences(CubaseApp().apps)
+        # FIX: the use of Cubase() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
+        self.default: list[Pref] = self.__get_default_preferences(Cubase().apps)
         # self.custom_preferences: list[Pref] = custom_preferences
         # self.current: Pref = current
 
@@ -157,12 +177,12 @@ class CubasePreferences:
         return default_prefs
 
     # read: https://realpython.com/python-json/
-    def store_custom():
+    def store_custom(self):
         pass
 
         
     # read: https://realpython.com/python-json/
-    def read_custom():
+    def read_custom(self):
         pass
 
 
@@ -185,7 +205,7 @@ class CubasePreferences:
             custom_pref_associated_installation = resolve_associated_installation(version)
 
             # FIX: the use of CubasePreferences() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
-            custom_pref_user_preset_path: Path = CubasePreferences().default_user_path
+            custom_pref_user_preset_path: Path = Preferences().default_user_path
 
             custom_pref = Pref(
                 name,
