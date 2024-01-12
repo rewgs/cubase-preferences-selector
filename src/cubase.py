@@ -1,14 +1,14 @@
-from pathlib import Path
-from pathlib import PurePath
+from dataclasses import dataclass
+from pathlib import Path, PurePath
 from platform import system
 from types import NoneType
-from dataclasses import dataclass
+
 import psutil
 
 
 class App:
     """
-    A single Cubase application installation (i.e. one for Cubase 12, another for Cubase 13, etc). 
+    A single Cubase application installation (i.e. one for Cubase 12, another for Cubase 13, etc).
     Composed from class Cubase?
     """
 
@@ -21,7 +21,7 @@ class App:
 
     def __str__(self):
         """
-        This is a special function that runs when printing instances of this object, 
+        This is a special function that runs when printing instances of this object,
         e.g. cubase_13 = App(some_path, 13); print(cubase_13)
         """
         return f"Cubase version {self.version} is called {self.path.name} and is located at {self.path}"
@@ -32,7 +32,8 @@ class Cubase:
     Primary class regarding Cubase.
     """
 
-    def __get_installed_apps(self) -> list[App]:
+    @staticmethod
+    def __get_installed_apps() -> list[App]:
         def get_default_path() -> Path:
             default_path: Path = Path(PurePath(Path.home().root))
 
@@ -48,7 +49,6 @@ class Cubase:
                 raise error
             else:
                 return default_path.resolve(strict=True)
-
 
         installations: list[App] = []
         app_paths = [file for file in get_default_path().iterdir() if file.is_dir() and "Cubase" in file.name]
@@ -105,20 +105,14 @@ class Pref:
     user_preset_path: Path
     associated_installation: App
 
-class Preferences:
+
+class PreferencesManager(Cubase):
     """
     Deals with locating, storing, and creating Cubase preferences, both default and custom.
     """
 
-    def __init__(self):
-        self.default_main_path: Path = self.__get_default_main_path()
-        self.default_user_path: Path = self.__get_default_user_path()
-        # FIX: the use of Cubase() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
-        self.default: list[Pref] = self.__get_default_preferences(Cubase().apps)
-        # self.custom_preferences: list[Pref] = custom_preferences
-        # self.current: Pref = current
-
-    def __get_default_main_path(self) -> Path:
+    @staticmethod
+    def __get_default_main_path() -> Path:
         default_main_path: Path = Path(PurePath(Path.home()))
 
         if system() == "Darwin":
@@ -126,7 +120,6 @@ class Preferences:
         # TODO:
         elif system() == "Windows":
             pass
-
         try:
             default_main_path.resolve(strict=True)
         except FileNotFoundError as error:
@@ -134,13 +127,12 @@ class Preferences:
         else:
             return default_main_path.resolve(strict=True)
 
-    def __get_default_user_path(self) -> Path:
+    @staticmethod
+    def __get_default_user_path() -> Path:
         default_user_path: Path = Path(PurePath(Path.home()).joinpath("Documents"))
 
         if system() == "Darwin":
-            default_user_path = default_user_path.joinpath(
-                "Steinberg", "Cubase", "User Presets"
-            )
+            default_user_path = default_user_path.joinpath("Steinberg", "Cubase", "User Presets")
         # TODO:
         elif system() == "Windows":
             pass
@@ -153,6 +145,10 @@ class Preferences:
             return default_user_path.resolve(strict=True)
 
     def __get_default_preferences(self, installed_apps: list[App]) -> list[Pref] | None:
+        """
+        Returns a list of default preferences for all verisons of Cubase.
+        """
+
         default_prefs: list[Pref] = []
 
         for file in self.default_main_path.iterdir():
@@ -164,55 +160,53 @@ class Preferences:
                         except FileNotFoundError as error:
                             raise error
                         else:
-                            pref = Pref(
-                                file.name,
-                                i.version,
-                                "",
-                                True,
-                                file.resolve(strict=True),
-                                self.default_user_path,
-                                i,
-                            )
+                            pref = Pref(file.name, i.version, "", True, file.resolve(strict=True),
+                                        self.default_user_path, i, )
                             default_prefs.append(pref)
         return default_prefs
 
-    # read: https://realpython.com/python-json/
-    def store_custom(self):
-        pass
+    def __init__(self):
+        super().__init__()
+        self.default_main_path: Path = self.__get_default_main_path()
+        self.default_user_path: Path = self.__get_default_user_path()
+        self.default: list[Pref] = self.__get_default_preferences(self.apps)
+        # self.custom_preferences: list[Pref] = custom_preferences  # self.current: Pref = current
 
-        
-    # read: https://realpython.com/python-json/
-    def read_custom(self):
-        pass
+    def add_custom(self, name: str, path: Path, version: int | NoneType = None,
+                   description: str | NoneType = None) -> Pref:
+        """Adds a new Pref in a custom location. Default behavior is to target the most recent version of Cubase, but
+        an older version can be overridden.
+        @param name: The name of the new Pref.
+        @param path: The path to the new Pref.
+        @param version: The version of Cubase the new Pref is to target.
+        @param description: Optional long description of the new Pref.
+        @return: The new Pref.
+        """
 
+        # read: https://realpython.com/python-json/
+        def store_custom(self):
+            pass
 
-    # TODO: version needs to be the most recent Cubase version instead of None...how to do?
-    def add_custom(self, name: str, path: Path, version: int | NoneType = None, description: str | NoneType = None) -> Pref:
+        # read: https://realpython.com/python-json/
+        def read_custom(self):
+            pass
+
         try:
             path.resolve(strict=True)
         except FileNotFoundError as error:
             raise error
         else:
-            def resolve_associated_installation(version) -> App | NoneType:
-                if version == None:
-                    return None
-                # else:
-                    # return most recent App
+            if version is None:
+                version == self.newest
 
             custom_pref_path = path.resolve(strict=True)
 
             # remaining attr declarations
-            custom_pref_associated_installation = resolve_associated_installation(version)
+            custom_pref_associated_installation = self.get_by_version(version)
 
-            # FIX: the use of CubasePreferences() here smells...wrong. Perhaps this is a usecase for composition/inheritance?
-            custom_pref_user_preset_path: Path = Preferences().default_user_path
+            custom_pref_user_preset_path: Path = self.default_user_path
 
-            custom_pref = Pref(
-                name,
-                version,
-                description,
-                False,
-                custom_pref_path,
-                custom_pref_user_preset_path,
-                custom_pref_associated_installation
-            )
+            custom_pref = Pref(name, version, description, False, custom_pref_path, custom_pref_user_preset_path,
+                               self.get_by_version(version))
+
+            return custom_pref

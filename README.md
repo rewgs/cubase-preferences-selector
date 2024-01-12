@@ -12,7 +12,7 @@ Allows a user to dynamically switch between different Cubase configurations.
 
 # TODO
 ## MVP
-- most recent version of Cubase only:
+- most recent version of Cubase only (save above `-V` option for later):
     - symlink files
         - CubasePreferences.add_custom()
     - refuse to do so if Cubase is open
