@@ -165,12 +165,15 @@ class PreferencesManager(Cubase):
                             default_prefs.append(pref)
         return default_prefs
 
-    def __init__(self):
+
+    def __init__(self, custom_preferences_store=None):
         super().__init__()
+        self.custom_preferences_store: Path | NoneType = custom_preferences_store
         self.default_main_path: Path = self.__get_default_main_path()
         self.default_user_path: Path = self.__get_default_user_path()
-        self.default: list[Pref] = self.__get_default_preferences(self.apps)
-        # self.custom_preferences: list[Pref] = custom_preferences  # self.current: Pref = current
+        self.default_preferences: list[Pref] = self.__get_default_preferences(self.apps)
+        self.custom_preferences: list[Pref] = []
+        # self.current_preferences: Pref = # TODO:
 
     def add_custom(self, name: str, path: Path, version: int | NoneType = None,
                    description: str | NoneType = None) -> Pref:
@@ -182,14 +185,6 @@ class PreferencesManager(Cubase):
         @param description: Optional long description of the new Pref.
         @return: The new Pref.
         """
-
-        # read: https://realpython.com/python-json/
-        def store_custom(self):
-            pass
-
-        # read: https://realpython.com/python-json/
-        def read_custom(self):
-            pass
 
         try:
             path.resolve(strict=True)
@@ -209,4 +204,14 @@ class PreferencesManager(Cubase):
             custom_pref = Pref(name, version, description, False, custom_pref_path, custom_pref_user_preset_path,
                                self.get_by_version(version))
 
+            self.custom_preferences.append(custom_pref)
             return custom_pref
+
+    # reference: https://realpython.com/python-json/
+    def write(self):
+        """Writes the CustomPref to disk."""
+        pass
+
+    def read(self):
+        """Reads the CustomPref from disk."""
+        pass
