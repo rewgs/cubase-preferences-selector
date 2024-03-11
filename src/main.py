@@ -6,7 +6,7 @@ from cpm import Cubase, PreferencesManager
 def main():
     cb = Cubase()
     # cb_prefs = PreferencesManager()
-    cb.list_all_apps()
+    print(cb.is_open())
 
 
 if __name__ == "__main__":

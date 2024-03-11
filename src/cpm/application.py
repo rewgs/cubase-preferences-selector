@@ -69,15 +69,15 @@ class Cubase:
                 installations.append(app)
             return installations
 
-    def __get_newest_version(self) -> CubaseApp:
+    def __get_latest_version(self) -> CubaseApp:
         version_nums = [i.version for i in self.apps]
-        newest_version_num = max(version_nums)
-        newest = [i for i in self.apps if str(newest_version_num) in i.path.stem]
-        return newest[0]
+        latest_version_num = max(version_nums)
+        latest = [i for i in self.apps if str(latest_version_num) in i.path.stem]
+        return latest[0]
 
     def __init__(self):
         self.apps: list[CubaseApp] = self.__get_installed_apps()
-        self.newest: CubaseApp = self.__get_newest_version()
+        self.latest: CubaseApp = self.__get_latest_version()
 
     def __str__(self):
         return "test"
@@ -88,14 +88,18 @@ class Cubase:
                 return app
         return None
 
-    # TODO: make a version of this that checks if a specific version of Cubase is open; do this in class CubaseApp
-    def is_open(self) -> bool:
+    def is_open(self, version: int | NoneType = None) -> bool:
         """
-        Checks if *any* version of Cubase is open.
+        Checks if Cubase is open. If version is supplied, only that version is checked.
         """
-        for proc in psutil.process_iter(["pid", "name", "username"]):
-            if "Cubase" in proc.name() and proc.is_running():
-                return True
+        if version is not None:
+            for proc in psutil.process_iter(["pid", "name", "username"]):
+                if f"Cubase {str(version)}" in proc.name() and proc.is_running():
+                    return True
+        else:
+            for proc in psutil.process_iter(["pid", "name", "username"]):
+                if "Cubase" in proc.name() and proc.is_running():
+                    return True
         return False
 
     def list_all_apps(self):
