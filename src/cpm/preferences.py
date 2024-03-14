@@ -22,7 +22,7 @@ class Pref:
     associated_installation: CubaseApp
 
 
-class PreferencesManager(Cubase):
+class Preferences(Cubase):
     """
     Deals with locating, storing, and creating Cubase preferences, both default and custom.
     """

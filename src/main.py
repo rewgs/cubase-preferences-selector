@@ -1,12 +1,11 @@
-from pathlib import Path, PurePath
-
-from cpm import Cubase, PreferencesManager
+import cli
+from cpm import Cubase
 
 
 def main():
     cb = Cubase()
-    # cb_prefs = PreferencesManager()
-    print(cb.is_open())
+    print(cb.is_open(12))
+    # cli.parse(cb)
 
 
 if __name__ == "__main__":

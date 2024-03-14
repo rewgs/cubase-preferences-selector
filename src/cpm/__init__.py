@@ -1,6 +1,7 @@
 from .application import Cubase
-from .preferences import PreferencesManager
+from .preferences import Preferences
 
 __all__ = [
-    "PreferencesManager"
+    "Cubase",
+    "Preferences"
 ]
