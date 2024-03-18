@@ -4,8 +4,7 @@ from cpm import Cubase
 
 def main():
     cb = Cubase()
-    print(cb.is_open(12))
-    # cli.parse(cb)
+    cli.parse(cb)
 
 
 if __name__ == "__main__":

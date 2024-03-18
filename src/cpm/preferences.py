@@ -12,13 +12,12 @@ class Pref:
     """
     A single instance of Cubase preferences, either default or custom.
     """
-
     name: str
     version: int
     description: str
     default: bool  # False for custom
     main_prefs_path: Path
-    user_preset_path: Path
+    user_presets_path: Path
     associated_installation: CubaseApp
 
 

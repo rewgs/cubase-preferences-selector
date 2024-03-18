@@ -10,37 +10,64 @@ __all__ = [
 ]
 
 
-# TODO:
-# -a, --set-active-preferences: Specifies which config is active (requires path or name)
-# -s, --save-config: Saves a new config to disk (requires path and name)
-# -i, --import-config: Imports a new config from disk (requires path or name)
-# -d, --delete-config: Delete a config (requires path or name)
 def __create_parser(cb: Cubase):
     """
     Returns a parser object with defined arguments.
     """
     parser = argparse.ArgumentParser(prog=__app_name__, 
                                      description="Enables easy switching between multiple Cubase preferences folders.")
+
     parser.add_argument("-v", "--version", 
                         action="version", 
                         version=f"{__app_name__} v{__version__}")
+
     parser.add_argument("-V", "--cubase-version", 
                         help="Specifies the Cubase version, the preferences of which will be replaced by custom preferences. If not supplied, the most recent version of Cubase will be targetted.",
                         choices=[str(a.version) for a in cb.apps],
                         default=None, 
                         required=False)
+
     parser.add_argument("-c", "--list-cubase-versions",
                         help="Lists which versions of Cubase are installed and exits (* specifies currently-selected).",
                         default=None,
                         action="store_true",
                         required=False)
-    # TODO:
+
+    # TODO: subparsers:
     #   -c, --custom: Lists only custom configs.
     #   -s, --stock: Lists only stock configs.
     parser.add_argument("-p", "--list-cubase-preferences", 
                         help="Lists available Cubase preferences (* specifies active).",
                         action="store_true",
                         required=False)
+
+    # TODO:
+    parser.add_argument("-a", "--set-active",
+                        help="Specify which preferences to use (requires path to new config, or name of already-stored config). If `--cubase-version` is not supplied, latest version is chosen.",
+                        default=cb.latest,
+                        required=False)
+
+    # TODO:
+    parser.add_argument("-s", "--store",
+                        help="Store a new config to disk (requires path and name).",
+                        default=None,
+                        required=False)
+
+    # TODO:
+    parser.add_argument("-i", "--import",
+                        help="Imports a new config from disk to store (requires path or name)",
+                        required=False)
+
+    # TODO:
+    parser.add_argument("-d", "--delete-from-store",
+                        help="Deletes a config from store (requires path or name)",
+                        required=False)
+
+    # TODO:
+    parser.add_argument("-D", "--delete-from-disk",
+                        help="Deletes a config from store and disk (requires path or name)",
+                        required=False)
+
     return parser
 
 
