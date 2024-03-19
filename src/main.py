@@ -1,5 +1,5 @@
 import cli
-from cpm import Cubase
+from cubase import Cubase
 
 
 def main():
